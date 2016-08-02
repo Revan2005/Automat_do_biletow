@@ -1,0 +1,136 @@
+===================================================================================================
+Typ Enum TicketType
+Zawiera wszystkie dostępne typy biletów.
+
+
+===================================================================================================
+Klasa CoinResource
+Przechowuje informacje o zasobach monet poszcególnych nominałów dostępnych w automacie.
+
+Konstruktor bezargumentowy (korzystając z metody initializeCoinQuantities) tworzy zasób 10 monet 
+każdego z nominałów. Monety wraz z ich licznościami są przechowywane
+ w strukturze TreeMap<BigDecimal, Integer>. Istotne z punktu widzenia wydawania reszty jest 
+posortowanie kluczy (nominałów, przechowywanych w posortowanej od wartości największej do 
+najmniejszej strukturze ArrayList<BigDecimal>) Możliwe jest łatwe rozszerzenie poprzez utworzenie 
+konstruktorów wykorzystujących źródła danych określające liczby monet jakie powinny się znaleźć 
+w automacie w momencie rozpoczęcia jego działania (bądź liczby monet po ich uzupełnieniu 
+przez serwisantów).
+
+Metoda getCoinsDenominations zwraca wszystkie obsługiwane przez automat nominały monet.
+
+Metoda calculateSumOfMoney oblicza sumę pieniędzy znajdujących się a automacie, wartość ta jest 
+wyświetlana wraz z zasobami monet na życzenie użytkownika. 
+
+Metoda toString zwraca ciąg znaków opisujący zasoby monet i sumę wartości pieniędzy w automacie
+
+Metoda getBiggestCoinLessOrEqualThan jest wykorzystywana przy wydawaniu reszty. Reszta jest wydawana
+ począwszy od największych nominałów. W naszym systemie pieniężnym gwarantuje to wydanie reszty 
+z wykorzystaniem najmniejszej liczby monet.
+
+Metody addCoins i removeCoins działają zgodnie z nazwą
+
+Metody removeCoins oraz getBiggestCoinLessOrEqualThan mogą rzucać wyjątki typu LackOfCoinsException
+
+
+===================================================================================================
+Klasa TicketResource
+Przechowuje informacje o zasobach dostępnych biletów. Ich trodzaje, ceny oraz liczby.
+
+Konstruktor tworzy strukturę typu HashMap<TicketType, BigDecimal> przechowującą ceny każego typu 
+biletów, ceny biletów normalnych są przyporządkowane typom biletów w ciele metody 
+initializeTicketPrices, ceny biletów ulgowych są wyliczane na ich podstawie z wykorzystaniem 
+prywatnego pola o nazwie discountBD typu BigDecimal, przechowującego wielkość zniżki. 
+Ponadto konstruktor wywołuje metodę initializeTicketQuantities, przyporządkowującą zasoby 
+tj. liczby biletów poszczególnych typów dostępne w automacie (treść zadania zawiera wzmiankę 
+o sytuacji braku biletów określonego typu, w związku z czym zasób ten jest traktowany jako 
+wyczerpywalny. Liczby i ceny biletów na początku działania automatu są zawarte w kodzie. 
+Użytkownik automatu nie powinien mieć możliwości ingerowania w te wartości. Natomiast obsługa 
+automatu powinna mieć możliwość ustalania tych wartości, np przy uzupełnianiu zasobów biletów, 
+lub przy zmianie ich cen, do tego celu wystarczyłoby utworzyć dodatkowe konstruktory przyjmujące 
+zadane wartości wczytane w jakiejkolwiek formie (np podane prez obsługę automatu lub z pliku, 
+bądź z bazy danych).
+
+Metoda getPrice zwraca cenę zadanego argumentem typu biletu.
+
+Metoda ticketsAvaliable zwraca wartość boolowską odpowiadając na pytanie czy automat zawiera 
+bilety określone pierwszym z parametrów w liczbie określonej parametrem drugim (public boolean 
+ticketsAvaliable(TicketType type, int numTickets)).
+
+Metoda toString działa w sposób zgodny z intuicją.
+
+Metoda removeTickets usuwa zadaną liczbę biletów zadanego typu z automatu (wykorzystywana przy 
+drukowaniu - tj. sprzedaży biletów). W przypadku gdy brakuje biletów rzuca wyjątek typu 
+LackOfTicketsException
+
+Metoda calculateReducedPrice oblicza cenę biletu ulgowego na podstawie ceny biletu normalnego 
+i jest wykorzystywana przez metodę initializeTicketPrices.
+
+
+==================================================================================================
+Klasa Automat
+Służy jedynie do inicjalizacji zasobów monet i biletów oraz uruchomienia głównego menu.
+
+
+==================================================================================================
+Klasa App
+Zawiera metodę main w której tworzona jest instancja klasy Automat.
+
+
+==================================================================================================
+Klasa Order
+Przechowuje dane dotyczące zamówienia.
+
+Ma dostęp do obiektów klas TicketResource i CoinResource przechowujących informacje o dostępnych 
+zasobach biletów i monet. Zawiera pole typu TreeMap<TicketType, Integer> przechowujące rodzaje 
+i liczby zamówionych biletów. Program w obecnej formie pozwala na jednorazowe złożenie zamówienia 
+na tylko jeden rodzaj biletów (tak jak ma to miejsce np. w automatach wrocławskiego MPK). 
+Po zamówieniu wybranej liczby biletów jednego typu następuje płatność po czym dopiero jest możliwe 
+złożenie zamówienia na inny rodzaj biletów. Pole to jednak uwzględnia możliwość potrzeby 
+rozszerzenia funkcjonalności o składanie zamówień złożonych z różnych biletów i płaceniu łącznie 
+za wszystkie przy podsumowaniu.
+
+Metody addTickets i toString działają zgodnie z nazwami.
+
+Metoda buy przechodzi do płatności z wykorzystaniem obiektu typu payment sprawdzając jednocześnie 
+dostępność zamówionej ilości biletów.
+
+Metoda cancel pozwala na anulowanie zamówienia.
+
+Metoda printTickets drukuje zamówione bilety. Drukowanie polega na wyświetleniu napisu mówiącego 
+o drukowaniu, oczywiście metodę tę można zmodyfikować dowolnie tak aby akcją było rzeczywiste 
+drukowanie biletów.
+
+
+==================================================================================================
+Klasa Payment
+Odpowiada za część interakzji z użytkownikiem za pośrednictwem wyświetlania i sczytywania tekstu 
+z konsoli. Obejmuje interakcje związane z dokonywaniem płatności i nadzoruje jej poprawność 
+(przyjmowanie monet i wydawanie reszty, sprawdzanie czy jest możliwe wydanie reszty).
+
+Metoda ejectCoin wyrzuca monetę o zadanym przez argument nominale.
+
+Metoda spendTheRest korzystając z metody ejectCoin zwraca użytkownikowi resztę (lub wpłacone 
+pieniądze, jeżeli transakcja z jakichś względów nie doszła do skutku). Jeżeli nie jest możliwe 
+wydanie reszty rzucany jest wyjątek LackOfCoinsException
+
+Metoda isPossibleToSpendTheRest zwraca wartość true jeżeli możliwe jest wydanie reszty, false wpp.
+
+Metoda finalizeTransaction kończy transakcję lub rzuca wyjątek, jeżeli nie można wydać reszty.
+
+Metody addToCoinResource i removeFromCoinResource działają tak jak się można tego po nich spodziewać, 
+removeFromCoinResource rzuca wyjątek LackOfCoinsException jeżeli monet do usunięcia jest więcej niż 
+znajduje się ich w automacie.
+
+Metoda cancel anuluje zamówienie.
+
+Metody pay, insertCoint i insertSpecificCoins związane są z interfejsem użytkownika i odpowiadają 
+za wyświetlanie kolejnych ekranów wraz z pobieraniem od użytkownika decyzji i sterowaniem 
+na ich podstawie.
+
+
+==================================================================================================
+Klasa Menu
+Odpowiada za sterowanie związwane z interakcją z użytkownikiem za pośrednictwem wyświetlanego 
+i sczytywanego z konsoli tekstu.
+
+
