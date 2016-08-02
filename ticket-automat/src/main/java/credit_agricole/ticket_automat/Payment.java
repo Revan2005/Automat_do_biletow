@@ -126,7 +126,7 @@ public class Payment {
 	
 	private void spendTheRest(BigDecimal rest) throws LackOfCoinsException{
 		System.out.println("Cena: " + totalPrice + "zł." +
-							"wpłacono: " + amountOfInsertedMoney + "zł. " + 
+							" wpłacono: " + amountOfInsertedMoney + "zł. " + 
 							"reszta: " + rest);
 		//System.out.println(coinResource.toString());
 		BigDecimal coin;
